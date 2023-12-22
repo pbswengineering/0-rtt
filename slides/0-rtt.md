@@ -2,22 +2,27 @@
 marp: true
 paginate: true
 header: Network Security - M.Sc Cybersecurity - Università di Pisa
-backgroundImage: url('background_internal.png')
+backgroundImage: url('background.png')
 ---
 <!-- _paginate: skip -->
-<!-- _backgroundImage: url('background_title.png') -->
+<!-- _backgroundImage: url('background_1st.png') -->
+<!-- _header: . -->
+<br>
+<br>
 <br>
 
-# Replay Attack in TLS 1.3 0-RTT Handshake: Countermeasure Techniques
+<h1 style="color: #ffde59; font-size: 200%; text-shadow: 2px 2px #333">Replay Attack in TLS 1.3 0-RTT Handshake: Countermeasure Techniques</h1>
 
 <table style="width: 100%">
 <tr style="background-color: rgba(0, 0, 0, 0); border: none">
-<td style="width: 50%; border: none">
+<td style="width: 60%; border: none; color: white; font-weight: bold; text-shadow: 2px 2px #333;">
 Network Security (933II)<br>
 M.Sc. Cybersecurity<br>
-Paolo Bernardi (660944)
+Paolo Bernardi (660944)<br>
+<br>
+Version: 1.0
 </td>
-<td style="width: 50%; border: none">
+<td style="width: 40%; border: none">
 <div style="text-align: left">
 <img width="400" src="unipi.png">
 </div>
@@ -27,16 +32,24 @@ Paolo Bernardi (660944)
 
 ---
 
-# 1. Paper
+<div style="width: 75%">
+
+# The Paper
 
   - **Conference:** 2023 IEEE 6th International Conference on Electrical, Electronics and System Engineering (ICEESE)
   - **Authors:** M.E Abdelhafez (Malaysia), Sureswaran Ramadass (Malaysia), Mohammed S. M. Gismallab (Saudi Arabia)
   - **Goal:** review anti-replay protection techniques
   - **Keywords:** TLS 1.3, replay attack, 0-RTT, handshake
 
+</div>
+
+<div style="text-align: center">
+<img width="350" src="ieee.jpg">
+</div>
+
 ---
 
-# 2. Context
+# Context
 
 <table style="width: 100%">
 <tr style="background-color: rgba(0, 0, 0, 0); border: none">
@@ -57,7 +70,7 @@ Paolo Bernardi (660944)
 
 ---
 
-# 3. Attack Scenarios
+# Attack Scenarios
 
 <table style="width: 100%">
 <tr style="background-color: rgba(0, 0, 0, 0); border: none">
@@ -79,40 +92,113 @@ Paolo Bernardi (660944)
 
 ---
 
-# 4a. Freshness check
+<div style="width: 83%">
 
-Reject **ClientHello** messages whose **gmt_unix_time** is outside a predetermined time frame
+# Freshness check
 
-# 4b. Client-Hello Recording
+Reject **ClientHello** messages whose **gmt_unix_time** too much in the past
 
-The server keeps a list of received **ClientHello** messages and uses it to detect and discard replays (**ACHTUNG: complex setup in distributed scenarios**)
+  - **PROS:** simple implementation
+  - **CONS:** can be inconvenient and there is an exploitable time window for attackers
 
----
+# ClientHello Recording
 
-# 5a. Single-Use Tickets
+The server keeps a list of received **ClientHello** messages and uses it to detect and discard replays 
 
-# 5b. Application Profile
+  - **PROS:** can block all replay attacks
+  - **CONS:** complex setup in distributed environments
 
----
-
-# 6. Separate API
-
----
-
-# 7. Puncture Pseudorandom Function (PPRF)
+</div>
 
 ---
 
-# 8. Universal SSL
+<div style="width: 85%">
+
+# Single-Use Tickets
+
+The server **deletes** the "session ticket key" used to decrypt the early data after the first 0-RTT resume, making it impossible to decrypt replayed messages.
+  - **PROS:** prevents 100% of replay attacks
+  - **CONS:** requires synchronization between nodes in distributed environments
+
+</div>
+<div style="text-align: center">
+<img width="400" src="single_use_tickets_scheme.png" style="background-color: rgba(0, 0, 0, 0)">
+</div>
 
 ---
 
-# 9. Just-in-Time Shared Keys (JIT-SK)
+<div style="width: 80%">
+
+# Application Profile
+
+Each application should implement a specific **profile** that specifies under which conditions it will use 0-RTT (e.g. HTTP GET).
+  - **PROS:** flexibility
+  - **CONS:** not 100% safe, requires intervention at application level
+
+# Separate API
+
+Both client and servers use libraries that make 0-RTT usage **explicit**, rather than implicit and automatic.
+  - **PROS:** explicit behaviour
+  - **CONS:** requires TLS libs restructuring and programmers attention
+
+</div>
 
 ---
 
-# 10. Conclusions
+<div style="width: 80%">
+
+# Puncture Pseudorandom Function (PPRF)
+
+By using **PPRF** the server can decrypt 0-RTT early data only once.
+
+**Example approach:** a server maintains a session ticket encryption key (STEK) *k* that can decrypt any session ticket. Then it uses it to decrypt a ticket *t* and it generates a STEK *k'* that can decrypt all session tickets but *t* and so on...
+
+  - **PROS:** forward secrecy
+  - **CONS:** long processing time, cannot be used in distributed environments
+
+</div>
+
+---
+
+<div style="width: 80%">
+
+# Universal SSL
+
+Introduced by **Cloudflare** in 2015 (doesn't support TLS 1.3), Universal SSL stores negotiated sessions into multiple **Memcached** instances. Each session is indexed and encrypted by **Session ID**.
+
+  - **PROS:** great performance
+  - **CONS:** Memcached servers are synchronized only within each  Cloudflare PoP
+
+</div>
+<div style="text-align: center">
+<img width="800" src="universal_ssl.png" style="background-color: rgba(0, 0, 0, 0)">
+</div>
+
+---
+
+# Just-in-Time Shared Keys (JIT-SK)
+
+<div style="width: 80%">
+
+Based on a **synchronized PRNG**, dynamically changes keys for each session to secure 0-RTT messages (the same key cannot be reused multiple times, so "blind replaying" is impossible)
+  - **PROS:** prevents replay attacks and provides **forward secrecy**
+  - **CONS:** doesn't support distributed environments
+
+</div>
+
+---
+
+<div style="width: 80%">
+
+# Conclusions
 
   - **0-RTT is here to stay**: the performance improvements are real (the paper stats that 0-RTT resume is 44.7% than 1-RTT) and the percentage of resumed TLS connections is also quite high (40% ins some applications)
-  - **0-RTT anti-reply protection requires trade offs:** the evaluated protections introduce overheads and/or inconveniences;
-  - **JIT-SK** is the most promising protection for high traffic networks but it might not be interoperable with existing TLS 1.3 systems and anti-reply me
+  - **0-RTT anti-reply protection requires trade offs:** the evaluated protections introduce overheads and/or inconveniences, especially in distributed environments (e.g. CDNs), therefore 0-RTT replay protection is still an open research topic
+
+</div>
+
+---
+<!-- _paginate: skip -->
+<!-- _backgroundImage: url('background_thanks.png') -->
+<!-- _header: . -->
+
