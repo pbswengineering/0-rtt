@@ -1,7 +1,6 @@
 version: '3'
 services:
     php:
-        # image: 'php:8.2-fpm'
         build:
             context: ./docker
             dockerfile: php.Dockerfile
@@ -9,12 +8,25 @@ services:
         volumes:
             - './app:/var/www/html'
 
+    nginx-vuln:
+        build:
+            context: ./docker
+            dockerfile: nginx-vuln.Dockerfile
+        container_name: ${APP_NAME:?err}-nginx-vuln
+        ports:
+            - '443:443'
+        links:
+            - 'php'
+        volumes:
+            - './app:/var/www/html'
+            - './config/nginx-vuln:/etc/nginx/conf.d'
+            - './ca:/etc/ca'
+    
     nginx:
         image: nginx:1.25.3
         container_name: ${APP_NAME:?err}-nginx
         ports:
-            - '80:80'
-            - '443:443'
+            - '444:443'
         links:
             - 'php'
         volumes:
