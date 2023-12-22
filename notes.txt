@@ -1,0 +1,3 @@
+DEMO on the EXPERIMENTAL part of the paper
+10 slides, 10 minutes
+Perhaps I can modify NGINX to implement the simplest strategies (e.g. freshness check)?
