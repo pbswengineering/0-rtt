@@ -2,37 +2,35 @@
 marp: true
 paginate: true
 header: Network Security - M.Sc Cybersecurity - Università di Pisa
-backgroundImage: url('background.png')
+backgroundImage: url('background_internal.png')
 ---
 <!-- _paginate: skip -->
-<!-- _backgroundImage: url('background_1st.png') -->
+<!-- _backgroundImage: url('background_title.png') -->
 <!-- _header: . -->
 <br>
 <br>
 <br>
 
-<h1 style="color: #ffde59; font-size: 200%; text-shadow: 2px 2px #333">Replay Attack in TLS 1.3 0-RTT Handshake: Countermeasure Techniques</h1>
+<h1>Replay Attack in TLS 1.3 0-RTT Handshake: Countermeasure Techniques</h1>
 
-<table style="width: 100%">
-<tr style="background-color: rgba(0, 0, 0, 0); border: none">
-<td style="width: 60%; border: none; color: white; font-weight: bold; text-shadow: 2px 2px #333;">
+<table style="width: 100%; padding: 0; margin: 0; overflow: hidden">
+<tr style="background-color: rgba(0, 0, 0, 0); border: none; padding: 0; margin: 0">
+<td style="width: 50%; border: none; padding: 0; margin: 0">
 Network Security (933II)<br>
 M.Sc. Cybersecurity<br>
-Paolo Bernardi (660944)<br>
-<br>
-Version: 1.0
+Paolo Bernardi (660944)
 </td>
-<td style="width: 40%; border: none">
+<td style="width: 50%; border: none; padding: 0; margin: 0; overflow: hidden">
 <div style="text-align: left">
-<img width="400" src="unipi.png">
+<img width="400" src="unipi_logo.png">
 </div>
 </td>
 </tr>
 </table>
 
----
+Version 1
 
-<div style="width: 75%">
+---
 
 # The Paper
 
@@ -41,17 +39,15 @@ Version: 1.0
   - **Goal:** review anti-replay protection techniques
   - **Keywords:** TLS 1.3, replay attack, 0-RTT, handshake
 
-</div>
-
 <div style="text-align: center">
-<img width="350" src="ieee.jpg">
+<img width="300" src="ieee.jpg">
 </div>
 
 ---
 
 # Context
 
-<table style="width: 100%">
+<table style="width: 100%; overflow: hidden">
 <tr style="background-color: rgba(0, 0, 0, 0); border: none">
 <td style="width: 60%; border: none">
 <ul>
@@ -72,7 +68,7 @@ Version: 1.0
 
 # Attack Scenarios
 
-<table style="width: 100%">
+<table style="width: 100%; overflow: hidden">
 <tr style="background-color: rgba(0, 0, 0, 0); border: none">
 <td style="width: 60%; border: none">
 <ul>
@@ -92,60 +88,52 @@ Version: 1.0
 
 ---
 
-<div style="width: 83%">
+
 
 # Freshness check
 
 Reject **ClientHello** messages whose **gmt_unix_time** too much in the past
 
-  - **PROS:** simple implementation
-  - **CONS:** can be inconvenient and there is an exploitable time window for attackers
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Simple implementation
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Can be inconvenient and there is an exploitable time window for attackers
 
 # ClientHello Recording
 
 The server keeps a list of received **ClientHello** messages and uses it to detect and discard replays 
 
-  - **PROS:** can block all replay attacks
-  - **CONS:** complex setup in distributed environments
-
-</div>
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Can block all replay attacks
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Complex setup in distributed environments, complex synchronization
 
 ---
-
-<div style="width: 85%">
 
 # Single-Use Tickets
 
 The server **deletes** the "session ticket key" used to decrypt the early data after the first 0-RTT resume, making it impossible to decrypt replayed messages.
-  - **PROS:** prevents 100% of replay attacks
-  - **CONS:** requires synchronization between nodes in distributed environments
 
-</div>
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Can block all replay attacks
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Complex setup in distributed environments, complex synchronization
+
 <div style="text-align: center">
-<img width="400" src="single_use_tickets_scheme.png" style="background-color: rgba(0, 0, 0, 0)">
+<img width="550" src="single_use_tickets_scheme.png" style="background-color: rgba(0, 0, 0, 0)">
 </div>
 
 ---
-
-<div style="width: 80%">
 
 # Application Profile
 
 Each application should implement a specific **profile** that specifies under which conditions it will use 0-RTT (e.g. HTTP GET).
-  - **PROS:** flexibility
-  - **CONS:** not 100% safe, requires intervention at application level
+
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Flexibility
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Not 100% safe, requires intervention at application level
 
 # Separate API
 
 Both client and servers use libraries that make 0-RTT usage **explicit**, rather than implicit and automatic.
-  - **PROS:** explicit behaviour
-  - **CONS:** requires TLS libs restructuring and programmers attention
 
-</div>
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Explicit behaviour
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Requires TLS libs restructuring and programmers attention
 
 ---
-
-<div style="width: 80%">
 
 # Puncture Pseudorandom Function (PPRF)
 
@@ -153,23 +141,19 @@ By using **PPRF** the server can decrypt 0-RTT early data only once.
 
 **Example approach:** a server maintains a session ticket encryption key (STEK) *k* that can decrypt any session ticket. Then it uses it to decrypt a ticket *t* and it generates a STEK *k'* that can decrypt all session tickets but *t* and so on...
 
-  - **PROS:** forward secrecy
-  - **CONS:** long processing time, cannot be used in distributed environments
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Forward secrecy
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Long processing time, not practical in distributed environments
 
-</div>
 
 ---
-
-<div style="width: 80%">
 
 # Universal SSL
 
 Introduced by **Cloudflare** in 2015 (doesn't support TLS 1.3), Universal SSL stores negotiated sessions into multiple **Memcached** instances. Each session is indexed and encrypted by **Session ID**.
 
-  - **PROS:** great performance
-  - **CONS:** Memcached servers are synchronized only within each  Cloudflare PoP
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Great performance
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Memcached servers are synchronized only within each  Cloudflare PoP
 
-</div>
 <div style="text-align: center">
 <img width="800" src="universal_ssl.png" style="background-color: rgba(0, 0, 0, 0)">
 </div>
@@ -178,27 +162,27 @@ Introduced by **Cloudflare** in 2015 (doesn't support TLS 1.3), Universal SSL st
 
 # Just-in-Time Shared Keys (JIT-SK)
 
-<div style="width: 80%">
+Based on a **synchronized PRNG**, dynamically changes keys for each session to secure 0-RTT messages (the same key cannot be reused multiple times, so "blind replaying" is impossible).
 
-Based on a **synchronized PRNG**, dynamically changes keys for each session to secure 0-RTT messages (the same key cannot be reused multiple times, so "blind replaying" is impossible)
-  - **PROS:** prevents replay attacks and provides **forward secrecy**
-  - **CONS:** doesn't support distributed environments
-
-</div>
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Prevents replay attacks while providing forward secrecy
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Doesn't support distributed environments
 
 ---
-
-<div style="width: 80%">
 
 # Conclusions
 
-  - **0-RTT is here to stay**: the performance improvements are real (the paper stats that 0-RTT resume is 44.7% than 1-RTT) and the percentage of resumed TLS connections is also quite high (40% ins some applications)
-  - **0-RTT anti-reply protection requires trade offs:** the evaluated protections introduce overheads and/or inconveniences, especially in distributed environments (e.g. CDNs), therefore 0-RTT replay protection is still an open research topic
+## 0-RTT is here to stay
 
-</div>
+The performance improvements are real (the paper stats that 0-RTT resume is 44.7% than 1-RTT) and the percentage of resumed TLS connections is also quite high (40% ins some applications).
+
+## 0-RTT anti-reply protection requires trade offs:
+
+The evaluated protections introduce overheads and/or inconveniences, especially in distributed environments (e.g. CDNs), therefore 0-RTT replay protection is still an open research topic.
 
 ---
 <!-- _paginate: skip -->
-<!-- _backgroundImage: url('background_thanks.png') -->
+<!-- _backgroundImage: url('background_title.png') -->
 <!-- _header: . -->
+
+<h1 style="font-size: 300%; text-align: center">THANK YOU!</h1>
 
