@@ -28,14 +28,14 @@ Paolo Bernardi (660944)
 </tr>
 </table>
 
-Version 1
+Version 2
 
 ---
 
 # The Paper
 
   - **Conference:** 2023 IEEE 6th International Conference on Electrical, Electronics and System Engineering (ICEESE)
-  - **Authors:** M.E Abdelhafez (Malaysia), Sureswaran Ramadass (Malaysia), Mohammed S. M. Gismallab (Saudi Arabia)
+  - **Authors:** M. E. Abdelhafez (Malaysia), Sureswaran Ramadass (Malaysia), Mohammed S. M. Gismallab (Saudi Arabia)
   - **Goal:** review anti-replay protection techniques
   - **Keywords:** TLS 1.3, replay attack, 0-RTT, handshake
 
@@ -52,8 +52,8 @@ Version 1
 <td style="width: 60%; border: none">
 <ul>
 <li>TLS resumable connections</li>
-<li>TLS 1.3 introduced <strong>0-RTT</strong> resume mode, based on a <strong>Session-Ticket key</strong> created during the initial full handshake</li>
-<li>0-RTT obtained by sending a <strong>single message</strong> that contains both the <strong>ClientHello</strong> (with a known Session-Ticket key) and <strong>Application Data</strong> (also known as <strong>Early Data</strong>)</li>
+<li>TLS 1.3 introduced <strong>0-RTT</strong> resume mode, based on a <strong>Session Ticket</strong> created during the initial full handshake encrypted with a Session Ticket Encryption Key (<strong>STEK</strong>)</li>
+<li>0-RTT obtained by sending a <strong>single message</strong> that contains both the <strong>ClientHello</strong> (with a Session Ticket encrypted with a known STEK) and <strong>Application Data</strong> (also known as <strong>Early Data</strong>)</li>
 </ul>
 </td>
 <td style="width: 40%; border: none">
@@ -74,7 +74,7 @@ Version 1
 <ul>
 <li><strong>Replay</strong> attack</li>
 <li>Attacker intercepts and replays <strong>ClientHello</strong> messages with <strong>Early Data</strong></li>
-<li>The replayed message is valid because the <strong>ClientHello</strong> contains a <strong>Session-Ticket key</strong> recognized by the server</li>
+<li>The replayed message is valid because the <strong>ClientHello</strong> contains a <strong>Session Ticket</strong> recognized by the server</li>
 <li><strong>ALTERNATIVE SCENARIO:</strong> the attacker performs a <strong>MITM</strong> and makes the client <strong>to believe that the 0-RTT message wasn't received</strong>, triggering a resending
 </ul>
 </td>
@@ -108,7 +108,7 @@ The server keeps a list of received **ClientHello** messages and uses it to dete
 
 # Single-Use Tickets
 
-The server **deletes** the "session ticket key" used to decrypt the early data after the first 0-RTT resume, making it impossible to decrypt replayed messages.
+The server **deletes** the **STEK** used to decrypt the early data after the first 0-RTT resume, making it impossible to decrypt the Session Tickets of replayed messages.
 
 > <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Can block all replay attacks
 > <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Complex setup in distributed environments, complex synchronization
@@ -173,7 +173,7 @@ Based on a **synchronized PRNG**, dynamically changes keys for each session to s
 
 ## 0-RTT is here to stay
 
-The performance improvements are real (the paper stats that 0-RTT resume is 44.7% than 1-RTT) and the percentage of resumed TLS connections is also quite high (40% ins some applications).
+The performance improvements are real (the paper stats that 0-RTT resume is 44.7% than 1-RTT) and the percentage of resumed TLS connections is also quite high (40% in some applications).
 
 ## 0-RTT anti-reply protection requires trade offs:
 
