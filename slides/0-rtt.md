@@ -74,8 +74,8 @@ Version 2
 <ul>
 <li><strong>Replay</strong> attack</li>
 <li>Attacker intercepts and replays <strong>ClientHello</strong> messages with <strong>Early Data</strong></li>
-<li>The replayed message is valid because the <strong>ClientHello</strong> contains a <strong>Session Ticket</strong> recognized by the server</li>
-<li><strong>ALTERNATIVE SCENARIO:</strong> the attacker performs a <strong>MITM</strong> and makes the client <strong>to believe that the 0-RTT message wasn't received</strong>, triggering a resending
+<li>The replayed message is syntactically valid because the <strong>ClientHello</strong> contains a <strong>Session Ticket</strong> recognized by the server</li>
+<li><strong>ALTERNATIVE SCENARIO:</strong> the attacker performs a <strong>MITM blocking server 0-RTT responses</strong> and triggering a <strong>resending</strong>
 </ul>
 </td>
 <td style="width: 40%; border: none">
@@ -110,7 +110,7 @@ The server keeps a list of received **ClientHello** messages and uses it to dete
 
 The server **deletes** the **STEK** used to decrypt the early data after the first 0-RTT resume, making it impossible to decrypt the Session Tickets of replayed messages.
 
-> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Can block all replay attacks
+> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Can block all replay attacks, no space overhead
 > <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Complex setup in distributed environments, complex synchronization
 
 <div style="text-align: center">
@@ -139,7 +139,7 @@ Both client and servers use libraries that make 0-RTT usage **explicit**, rather
 
 By using **PPRF** the server can decrypt 0-RTT early data only once.
 
-**Example approach:** a server maintains a session ticket encryption key (STEK) *k* that can decrypt any session ticket. Then it uses it to decrypt a ticket *t* and it generates a STEK *k'* that can decrypt all session tickets but *t* and so on...
+**Example approach:** a server maintains a Session Ticket Encryption Key (STEK) *k* that can decrypt any session ticket. Then it uses it to decrypt a ticket *t* and it generates a STEK *k'* that can decrypt all session tickets but *t* and so on...
 
 > <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>✅ Forward secrecy
 > <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>❌ Long processing time, not practical in distributed environments
@@ -173,7 +173,7 @@ Based on a **synchronized PRNG**, dynamically changes keys for each session to s
 
 ## 0-RTT is here to stay
 
-The performance improvements are real (the paper stats that 0-RTT resume is 44.7% than 1-RTT) and the percentage of resumed TLS connections is also quite high (40% in some applications).
+The performance improvements are real (the paper states that 0-RTT resume is 44.7%  faster than 1-RTT) and the percentage of resumed TLS connections is also quite high (40% in some applications).
 
 ## 0-RTT anti-reply protection requires trade offs:
 

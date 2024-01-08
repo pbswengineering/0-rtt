@@ -43,21 +43,28 @@ ssl_connection.close()
 
 # Then try to re-use the session and send early data
 if session is not None:
-    print(w("Performing"), rb("0-RTT"), w("TLS handshake..."))
-    ssl_connection2 = server_info.get_preconfigured_tls_connection(override_tls_version=TlsVersionEnum.TLS_1_3)
-    if not isinstance(ssl_connection2.ssl_client, SslClient):
-        raise RuntimeError("Should never happen")
+    ok = False
+    try:
+        print(w("Performing"), rb("0-RTT"), w("TLS handshake..."))
+        ssl_connection2 = server_info.get_preconfigured_tls_connection(override_tls_version=TlsVersionEnum.TLS_1_3)
+        if not isinstance(ssl_connection2.ssl_client, SslClient):
+            raise RuntimeError("Should never happen")
 
-    ssl_connection2.ssl_client.set_session(session)
+        ssl_connection2.ssl_client.set_session(session)
 
-    # Open a socket to the server but don't do the actual TLS handshake
-    ssl_connection2._do_pre_handshake()
+        # Open a socket to the server but don't do the actual TLS handshake
+        ssl_connection2._do_pre_handshake()
 
-    # Send some bytes of early data
-    ssl_connection2.ssl_client.write_early_data(f"GET /index.php?receiver={receiver}&amount={amount} HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n".encode())
-    ssl_connection2.ssl_client.do_handshake()
-    if ssl_connection2.ssl_client.get_early_data_status() == OpenSslEarlyDataStatusEnum.ACCEPTED:
-        print(gb("Transfer completed, early data is supported"))
-    else:
-        print(rb("Early data is NOT supported"))
-    ssl_connection2.close()
+        # Send some bytes of early data
+        ssl_connection2.ssl_client.write_early_data(f"GET /index.php?receiver={receiver}&amount={amount} HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n".encode())
+        ssl_connection2.ssl_client.do_handshake()
+        if ssl_connection2.ssl_client.get_early_data_status() == OpenSslEarlyDataStatusEnum.ACCEPTED:
+            print(gb("Transfer completed, early data is supported"))
+        else:
+            print(rb("Early data is NOT supported"))
+        ssl_connection2.close()
+        ok = True
+    except:
+        print("Connection error, retrying in 1 second...")
+        import time
+        time.sleep(5)

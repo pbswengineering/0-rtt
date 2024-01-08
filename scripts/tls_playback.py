@@ -447,6 +447,7 @@ def proxy_main(early_data_queue, wait_for_replay, host, port, kill, kill_delay,
             own_server.listen(2)
             im_listening=True
         except socket.error:
+            print(sys.exc_info()[1])
             time.sleep(1)
     print(" Done. The proxy is ready.\n")
     set_alarm_handler()
